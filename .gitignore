@@ -1,0 +1,10 @@
+work/
+results/
+.nextflow*
+*.log
+.DS_Store
+*.bam
+*.bai
+*.vcf.gz
+*.vcf.gz.tbi
+!assets/test_data/**

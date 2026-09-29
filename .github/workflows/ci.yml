@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Nextflow
+        uses: nf-core/setup-nextflow@v2
+
+      - name: Comprobar sintaxis del pipeline
+        run: nextflow config .
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Nextflow
+        uses: nf-core/setup-nextflow@v2
+
+      - name: Ejecutar pipeline con datos sintéticos
+        run: |
+          nextflow run main.nf -profile test,docker --outdir results_ci
+
+      - name: Subir resultados como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-results
+          path: results_ci/
