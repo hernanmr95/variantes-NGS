@@ -75,13 +75,16 @@ workflow {
             .mix(FASTP.out.json.collect{ it[1] }.ifEmpty([]))
         MULTIQC(ch_multiqc_files.collect())
     }
-}
 
-workflow.onComplete {
-    log.info """
-    Pipeline completado.
-    Éxito     : ${workflow.success}
-    Duración  : ${workflow.duration}
-    Resultados: ${params.outdir}
-    """.stripIndent()
+    // -- Registro del hook de finalización (debe ir dentro del workflow
+    //    en Nextflow 24+, ya no se admite como bloque suelto a nivel de
+    //    script) -----------------------------------------------------------------
+    workflow.onComplete {
+        log.info """
+        Pipeline completado.
+        Éxito     : ${workflow.success}
+        Duración  : ${workflow.duration}
+        Resultados: ${params.outdir}
+        """.stripIndent()
+    }
 }
