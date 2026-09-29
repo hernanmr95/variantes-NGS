@@ -2,7 +2,7 @@ process FASTQC {
     tag "$sample_id"
     label 'low'
     container 'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0'
-    publishDir "${params.outdir}/fastqc/${sample_id}", mode: 'copy'
+    publishDir { "${params.outdir}/fastqc/${sample_id}" }, mode: 'copy'
 
     input:
     tuple val(sample_id), path(fastq_1), path(fastq_2)

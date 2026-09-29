@@ -2,7 +2,7 @@ process FASTP {
     tag "$sample_id"
     label 'medium'
     container 'quay.io/biocontainers/fastp:0.23.4--h5f740d0_0'
-    publishDir "${params.outdir}/fastp/${sample_id}", mode: 'copy'
+    publishDir { "${params.outdir}/fastp/${sample_id}" }, mode: 'copy'
 
     input:
     tuple val(sample_id), path(fastq_1), path(fastq_2)

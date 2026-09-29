@@ -2,7 +2,7 @@ process BCFTOOLS_CALL {
     tag "$sample_id"
     label 'medium'
     container 'quay.io/biocontainers/bcftools:1.19--h8b25389_0'
-    publishDir "${params.outdir}/variants/${sample_id}", mode: 'copy'
+    publishDir { "${params.outdir}/variants/${sample_id}" }, mode: 'copy'
 
     input:
     tuple val(sample_id), path(bam), path(bai)

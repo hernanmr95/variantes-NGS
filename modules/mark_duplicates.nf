@@ -2,7 +2,7 @@ process MARK_DUPLICATES {
     tag "$sample_id"
     label 'medium'
     container 'quay.io/biocontainers/mulled-v2-4ce73d19e0d7dc31305f37edc21ea01c9d99f00d:6dc7cd8331f28ad3b6c5c9b06e3a1e0f6f00e9e2-0' // picard + samtools
-    publishDir "${params.outdir}/alignment/${sample_id}", mode: 'copy'
+    publishDir { "${params.outdir}/alignment/${sample_id}" }, mode: 'copy'
 
     input:
     tuple val(sample_id), path(bam), path(bai)
