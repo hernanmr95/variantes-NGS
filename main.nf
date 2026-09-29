@@ -9,16 +9,6 @@
 nextflow.enable.dsl = 2
 
 // ---------------------------------------------------------------------------
-// Validación mínima de parámetros
-// ---------------------------------------------------------------------------
-if (!params.input) {
-    exit 1, "ERROR: Debes indicar un samplesheet con --input (ver README.md)"
-}
-if (!params.genome) {
-    exit 1, "ERROR: Debes indicar una referencia FASTA con --genome"
-}
-
-// ---------------------------------------------------------------------------
 // Import de módulos
 // ---------------------------------------------------------------------------
 include { FASTQC              } from './modules/fastqc.nf'
@@ -32,11 +22,19 @@ include { BCFTOOLS_FILTER     } from './modules/bcftools_filter.nf'
 include { MULTIQC             } from './modules/multiqc.nf'
 
 // ---------------------------------------------------------------------------
-// Canal de entrada a partir del samplesheet
+// Workflow principal
 // ---------------------------------------------------------------------------
 workflow {
 
-    ch_versions = Channel.empty()
+    // -- Validación de parámetros (dentro del workflow: las versiones
+    //    recientes de Nextflow no permiten sentencias sueltas a nivel de
+    //    script mezcladas con declaraciones de proceso/workflow) --------------
+    if (!params.input) {
+        exit 1, "ERROR: Debes indicar un samplesheet con --input (ver README.md)"
+    }
+    if (!params.genome) {
+        exit 1, "ERROR: Debes indicar una referencia FASTA con --genome"
+    }
 
     Channel
         .fromPath(params.input)
