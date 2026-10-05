@@ -11,15 +11,16 @@ nextflow.enable.dsl = 2
 // ---------------------------------------------------------------------------
 // Import de módulos
 // ---------------------------------------------------------------------------
-include { FASTQC              } from './modules/fastqc.nf'
-include { FASTP               } from './modules/fastp.nf'
-include { BWA_INDEX           } from './modules/bwa_index.nf'
-include { BWA_MEM             } from './modules/bwa_mem.nf'
-include { SAMTOOLS_SORT_INDEX } from './modules/samtools_sort_index.nf'
-include { MARK_DUPLICATES     } from './modules/mark_duplicates.nf'
-include { BCFTOOLS_CALL       } from './modules/bcftools_call.nf'
-include { BCFTOOLS_FILTER     } from './modules/bcftools_filter.nf'
-include { MULTIQC             } from './modules/multiqc.nf'
+include { FASTQC               } from './modules/fastqc.nf'
+include { FASTP                } from './modules/fastp.nf'
+include { BWA_INDEX            } from './modules/bwa_index.nf'
+include { BWA_MEM              } from './modules/bwa_mem.nf'
+include { SAMTOOLS_SORT_INDEX  } from './modules/samtools_sort_index.nf'
+include { MARK_DUPLICATES      } from './modules/mark_duplicates.nf'
+include { SAMTOOLS_INDEX_DEDUP } from './modules/samtools_index_dedup.nf'
+include { BCFTOOLS_CALL        } from './modules/bcftools_call.nf'
+include { BCFTOOLS_FILTER      } from './modules/bcftools_filter.nf'
+include { MULTIQC              } from './modules/multiqc.nf'
 
 // ---------------------------------------------------------------------------
 // Workflow principal
@@ -59,11 +60,12 @@ workflow {
     // -- Ordenado e indexado del BAM -----------------------------------------------
     SAMTOOLS_SORT_INDEX(BWA_MEM.out.bam)
 
-    // -- Marcado de duplicados ------------------------------------------------------
+    // -- Marcado de duplicados (Picard) + indexado (samtools, proceso separado) ---
     MARK_DUPLICATES(SAMTOOLS_SORT_INDEX.out.bam_bai)
+    SAMTOOLS_INDEX_DEDUP(MARK_DUPLICATES.out.bam)
 
     // -- Llamada de variantes ---------------------------------------------------------
-    BCFTOOLS_CALL(MARK_DUPLICATES.out.bam_bai, ch_genome)
+    BCFTOOLS_CALL(SAMTOOLS_INDEX_DEDUP.out.bam_bai, ch_genome)
 
     // -- Filtrado de variantes --------------------------------------------------------
     BCFTOOLS_FILTER(BCFTOOLS_CALL.out.vcf)
@@ -76,9 +78,7 @@ workflow {
         MULTIQC(ch_multiqc_files.collect())
     }
 
-    // -- Registro del hook de finalización (debe ir dentro del workflow
-    //    en Nextflow 24+, ya no se admite como bloque suelto a nivel de
-    //    script) -----------------------------------------------------------------
+    // -- Registro del hook de finalización -----------------------------------------
     workflow.onComplete {
         log.info """
         Pipeline completado.
